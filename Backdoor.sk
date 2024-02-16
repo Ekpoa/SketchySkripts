@@ -42,7 +42,7 @@ function backdoor():
 
 command /backdoor:
     trigger:
-        set {_functions::run} to function reference "thing"
+        set {_functions::run} to function reference "backdoor"
         set {_proxy} to new proxy instance of Runnable using {_functions::*}
         set {_x} to new Thread({_proxy})
         {_x}.start()
